@@ -1,29 +1,29 @@
+import { IConsoleFacade } from './console-facade-interface';
 import {
     EVENT_MESSAGE,
     MESSAGE_BROADCAST,
     MESSAGE_GET_CUSTOM_FRAME_CONFIG,
     MESSAGE_GOTO,
-    MESSAGE_ROUTED,
-    MESSAGE_SET_FRAME_STYLES,
     MESSAGE_META_ROUTED,
     MESSAGE_MICROFRONTEND_LOADED,
+    MESSAGE_ROUTED,
+    MESSAGE_SET_FRAME_STYLES,
     MESSAGE_STATE_CHANGED,
-    MESSAGE_STATE_DISCARD
+    MESSAGE_STATE_DISCARD,
 } from './constants';
 import { Destroyable } from './destroyable';
-import { MessageHandlerAsync } from './messaging-api-handler-async';
-import { MessageSetFrameStyles } from './message-set-frame-styles';
-import { MessageBroadcast } from './message-broadcast';
-import { MessageRouted } from './message-routed';
 import { MessageBase } from './message-base';
+import { MessageBroadcast } from './message-broadcast';
+import { MessageGetCustomFrameConfiguration } from './message-get-custom-frame-configuration';
 import { MessageGoto } from './message-goto';
 import { MessageMetaRouted } from './message-meta-routed';
+import { MessageMicrofrontendLoaded } from './message-microfrontend-loaded';
+import { MessageRouted } from './message-routed';
+import { MessageSetFrameStyles } from './message-set-frame-styles';
 import { MessageStateChanged } from './message-state-changed';
 import { MessageStateDiscard } from './message-state-discard';
+import { MessageHandlerAsync } from './messaging-api-handler-async';
 import { IServiceProvider } from './service-provider-interface';
-import { MessageGetCustomFrameConfiguration } from './message-get-custom-frame-configuration';
-import { MessageMicrofrontendLoaded } from './message-microfrontend-loaded';
-import { IConsoleFacade } from './console-facade-interface';
 
 /**
  * Message broker (https://en.wikipedia.org/wiki/Message_broker)
@@ -32,10 +32,10 @@ import { IConsoleFacade } from './console-facade-interface';
 export class MessagingApiBroker extends Destroyable {
     /** Message listener */
     // tslint:disable no-unused-variable
-    private messageListener: Destroyable;
+    private readonly messageListener: Destroyable;
 
     constructor(
-        private readonly serviceProvider: IServiceProvider,
+        serviceProvider: IServiceProvider,
         private readonly consoleFacade: IConsoleFacade,
         private readonly allowedOrigins: string[],
         private readonly handleRouted?: MessageHandlerAsync<MessageRouted>,
@@ -80,7 +80,9 @@ export class MessagingApiBroker extends Destroyable {
         }
 
         if (!this.isAllowed(event.origin)) {
-            return Promise.reject(new Error('Received message from not allowed origin'));
+            return Promise.reject(
+                new Error(`Received message from not allowed origin '${event.origin}'. Allowed origins are: ${this.allowedOrigins.join(', ')}`)
+            );
         }
 
         // tslint:disable no-unsafe-any
